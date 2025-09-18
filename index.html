@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meditrack Janitor Attendance Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+        }
+        .janitor-time {
+            font-size: 0.95em;
+            color: #2980b9;
+            margin-left: 16px;
+            font-weight: bold;
+        }
+        .late {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h1>Meditrack Janitor Attendance Portal</h1>
+        </div>
+        <div class="navbar-links">
+            <p>
+                Attendance System
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="formSection">
+            <h2>Mark Attendance</h2>
+            <button id="addJanitorButton" onclick="showAddJanitorForm()">
+                Add Janitor
+            </button>
+
+            <ul id="janitorsList">
+                <!-- Populate janitors dynamically -->
+            </ul>
+
+            <div id="summarySection">
+                <h3>Summary</h3>
+                <p>Total Janitors: <span id="totalJanitors">0</span></p>
+                <p>Total Time In: <span id="totalTimeIn">0</span></p>
+                <p>Total Time Out: <span id="totalTimeOut">0</span></p>
+                <p>Total Absent: <span id="totalAbsent">0</span></p>
+                <p>Total Leave: <span id="totalLeave">0</span></p>
+            </div>
+
+            <button onclick="submitAttendance()">Submit Daily Attendance</button>
+
+            <!-- Result Section -->
+            <div id="resultSection" style="display: none;">
+                <h3>Attendance Result</h3>
+                <p>Date: <span id="attendanceDate"></span></p>
+                <p>Time: <span id="attendanceTime"></span></p>
+                <p>Total Janitors: <span id="attendanceTotalJanitors"></span></p>
+                <p>Time In: <span id="attendanceTimeIn"></span></p>
+                <p>Time Out: <span id="attendanceTimeOut"></span></p>
+                <p>Absent: <span id="attendanceAbsent"></span></p>
+                <p>Leave: <span id="attendanceLeave"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="addJanitorPopup" class="popup">
+        <h2>Add Janitor</h2>
+        <label for="newJanitorName">Janitor Name:</label>
+        <input type="text" id="newJanitorName" required>
+        <label for="newJanitorID">Employee ID:</label>
+        <input type="text" id="newJanitorID" required>
+
+        <button onclick="addJanitor()">Submit</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
