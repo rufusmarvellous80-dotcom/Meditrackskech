@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MEDITRACK LIMITED Attendance List</title>
+  <!-- Latest EmailJS SDK v4 -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // Initialize EmailJS with your Public Key (User ID)
+    (function(){
+      emailjs.init("Wfz_vJ2NRT4YzMoJV");
+    })();
+  </script>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f7f7fa;
+        margin: 0;
+        padding: 2em;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    #date-today {
+        text-align: right;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        margin: 2em auto;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+        padding: 0.75em;
+        text-align: center;
+        border-bottom: 1px solid #ececec;
+    }
+
+    th {
+        background: #4f8ef7;
+        color: #fff;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    input[type="time"], input[type="date"], input[type="text"] {
+        width: 110px;
+        padding: 0.3em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    select.status {
+        padding: 0.4em;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-bottom: 5px;
+    }
+
+    .status-message {
+        font-weight: bold;
+        padding: 0.4em;
+        border-radius: 4px;
+        margin-top: 3px;
+    }
+
+    .status-present {
+        background: #e6ffe6;
+        color: #1e7e34;
+    }
+
+    .status-absent {
+        background: #ffe6e6;
+        color: #c82333;
+    }
+
+    .status-on-leave {
+        background: #e6f7ff;
+        color: #005cbf;
+    }
+
+    .status-late {
+        background: #fffbe6;
+        color: #d35400;
+    }
+
+    .status-late-break {
+        background: #fffbe6;
+        color: #d35400;
+    }
+
+    .status-multi-late {
+        background: #ffe6e6;
+        color: #b8860b;
+    }
+
+    button {
+        display: block;
+        margin: 2em auto;
+        padding: 0.75em 2em;
+        background: #4f8ef7;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1em;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #3563b7;
+    }
+
+    #add-staff-section, #search-section {
+        max-width: 600px;
+        margin: 0 auto 1em auto;
+        background: #fff;
+        padding: 1em 2em;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+
+    #search-section {
+        margin-bottom: 0.5em;
+        margin-top: 1em;
+    }
+
+    #summary-section {
+        background: #fff;
+        padding: 1em 2em;
+        margin: 2em auto;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    #summary-output {
+        margin-top: 1em;
+        font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>MEDITRACK LIMITED Janitor Attendance List</h1>
+  <div id="date-today">Date: <span id="current-date"></span></div>
+
+  <div id="add-staff-section">
+    <input type="text" id="new-staff-name" placeholder="Enter new staff name">
+    <button id="add-staff-btn">Add Staff</button>
+  </div>
+
+  <div id="search-section">
+    <input type="text" id="search-name" placeholder="Search staff name">
+    <button id="search-btn">Search</button>
+    <button id="clear-search-btn">Clear</button>
+  </div>
+
+  <table id="attendance-table">
+      <thead>
+          <tr>
+              <th>Name</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Break Out</th>
+              <th>Break In</th>
+              <th>Status</th>
+          </tr>
+      </thead>
+      <tbody>
+          <!-- Rows will be inserted by JS -->
+      </tbody>
+  </table>
+  <button id="check-attendance">Check Attendance / Save Summary</button>
+
+  <div id="summary-section">
+      <h2>View Past Attendance Summaries</h2>
+      <label for="summary-date">Select date:</label>
+      <input type="date" id="summary-date">
+      <button id="load-summary">Load Summary</button>
+      <div id="summary-output"></div>
+  </div>
+
+  <script>
+    // List of staff names (edit this array to update initial names)
+    const initialStaffNames = [
+      "Adebayo Elijah",
+      "Adegbenro Kudirat",
+      "Adekunle Ronke",
+      "Adeshina Rashidat",
+      "Afolabi Olawale",
+      "Alabi Hassan",
+      "Aluko joy",
+      "Amudat Lawal",
+      "Anuoluwapo Joseph",
+      "Aribo Olufemi",
+      "Awosanya Pelumi",
+      "Belewu Fathia",
+      "Delight Vincent",
+      "Hussein Rosul",
+      "Idebe Lekan",
+      "Iorhide Mariam",
+      "Ibrahim Omotoyosi",
+      "Kareem Muiz",
+      "Lawal Dasola",
+      "Misturah Disu",
+      "Ogundowo Bose",
+      "Odekun Esther",
+      "Ogunlusi Felicia",
+      "Okeshola Segun",
+      "Olarenwaju Fattimo",
+      "Osinga Temitope",
+      "Otukelu Balikis",
+      "Ouneyom Elizabeth",
+      "Salvador Meminat",
+      "Shogbola Oluwaseun",
+      "Sodiq Shukurat",
+      "Temitayo Martins",
+      "Tiamiyu Adijat"
+    ];
+
+    // Always keep staffNames sorted alphabetically
+    let staffNames = [...initialStaffNames].sort((a, b) => a.localeCompare(b));
+
+    // Utility for table row creation
+    function createStaffRow(name) {
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-name', name.toLowerCase());
+      tr.innerHTML = `
+        <td>${name}</td>
+        <td><input type="time" class="time-in"></td>
+        <td><input type="time" class="time-out"></td>
+        <td><input type="time" class="break-out"></td>
+        <td><input type="time" class="break-in"></td>
+        <td>
+            <select class="status">
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+                <option value="on-leave">On Leave</option>
+            </select>
+            <div class="status-message"></div>
+        </td>
+      `;
+      return tr;
+    }
+
+    // Insert staff rows into table
+    function populateStaffTable(names) {
+      const tbody = document.querySelector('#attendance-table tbody');
+      tbody.innerHTML = '';
+      names.forEach(name => {
+        tbody.appendChild(createStaffRow(name));
+      });
+    }
+
+    // On page load: populate table and set date
+    window.onload = function() {
+      populateStaffTable(staffNames);
+      // Display today's date
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('current-date').textContent = todayStr;
+      document.getElementById('summary-date').value = todayStr;
+    };
+
+    // Add staff button logic
+    document.getElementById('add-staff-btn').addEventListener('click', function() {
+      const newNameInput = document.getElementById('new-staff-name');
+      const newName = newNameInput.value.trim();
+      if (newName) {
+        staffNames.push(newName);
+        staffNames.sort((a, b) => a.localeCompare(b));
+        populateStaffTable(staffNames);
+        newNameInput.value = '';
+      } else {
+        alert('Please enter a staff name.');
+      }
+    });
+
+    // Search staff logic
+    document.getElementById('search-btn').addEventListener('click', function() {
+      const searchValue = document.getElementById('search-name').value.trim().toLowerCase();
+      const rows = document.querySelectorAll('#attendance-table tbody tr');
+      rows.forEach(row => {
+        if (!searchValue || row.getAttribute('data-name').includes(searchValue)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+
+    // Clear search to show all staff
+    document.getElementById('clear-search-btn').addEventListener('click', function() {
+      document.getElementById('search-name').value = '';
+      const rows = document.querySelectorAll('#attendance-table tbody tr');
+      rows.forEach(row => row.style.display = '');
+    });
+
+    document.getElementById('check-attendance').addEventListener('click', function() {
+        const rows = document.querySelectorAll('#attendance-table tbody tr');
+        let summaryData = [];
+        rows.forEach(row => {
+            // If row is hidden (filtered out by search), skip
+            if(row.style.display === "none") return;
+
+            const name = row.cells[0].textContent;
+            const timeIn = row.querySelector('.time-in').value;
+            const timeOut = row.querySelector('.time-out').value;
+            const breakOut = row.querySelector('.break-out').value;
+            const breakIn = row.querySelector('.break-in').value;
+            const statusSelect = row.querySelector('.status');
+            const statusMsgDiv = row.querySelector('.status-message');
+
+            let statusMsg = '';
+            let statusClass = '';
+
+            // Manual status overrides
+            if (statusSelect.value === 'absent') {
+                statusMsg = 'Absent';
+                statusClass = 'status-absent';
+            } else if (statusSelect.value === 'on-leave') {
+                statusMsg = 'On Leave';
+                statusClass = 'status-on-leave';
+            } else {
+                // Lateness logic
+                let lateToWork = false;
+                let lateToBreak = false;
+                let lateFromBreak = false;
+
+                // Time In: 7:00–7:10am
+                if (timeIn) {
+                    if (compareTime(timeIn, '07:00') < 0 || compareTime(timeIn, '07:10') > 0) {
+                        lateToWork = true;
+                    }
+                } else {
+                    statusMsg = 'Absent';
+                    statusClass = 'status-absent';
+                }
+
+                // Break Out: 11:00–12:00pm
+                if (breakOut) {
+                    if (compareTime(breakOut, '11:00') < 0 || compareTime(breakOut, '12:00') > 0) {
+                        lateToBreak = true;
+                    }
+                }
+
+                // Break In: must be <= 12:00pm
+                if (breakIn) {
+                    if (compareTime(breakIn, '12:00') > 0) {
+                        lateFromBreak = true;
+                    }
+                }
+
+                // Compose status message
+                if (statusMsg !== 'Absent') {
+                    let lateMessages = [];
+                    if (lateToWork) lateMessages.push('Late to Work');
+                    if (lateToBreak) lateMessages.push('Late to Break');
+                    if (lateFromBreak) lateMessages.push('Late from Break');
+
+                    if (lateMessages.length === 0) {
+                        statusMsg = 'Present';
+                        statusClass = 'status-present';
+                    } else if (lateMessages.length === 1) {
+                        statusMsg = lateMessages[0];
+                        statusClass = lateMessages[0] === 'Late from Break' ? 'status-late-break' : 'status-late';
+                    } else {
+                        statusMsg = lateMessages.join(' & ');
+                        statusClass = 'status-multi-late';
+                    }
+                }
+            }
+
+            // Set status cell styling and message
+            statusMsgDiv.textContent = statusMsg;
+            statusMsgDiv.className = `status-message ${statusClass}`;
+
+            // Collect summary data for saving
+            summaryData.push({
+                name,
+                timeIn,
+                timeOut,
+                breakOut,
+                breakIn,
+                status: statusMsg
+            });
+        });
+
+        // Save summary to localStorage
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        saveAttendanceSummary(todayStr, summaryData);
+        alert('Attendance summary saved for ' + todayStr);
+
+        // ---- EMAILJS CODE ----
+        // Create plain text summary for email
+        let summaryText = summaryData.map(item => 
+            `Name: ${item.name}
+Time In: ${item.timeIn || '-'}
+Time Out: ${item.timeOut || '-'}
+Break Out: ${item.breakOut || '-'}
+Break In: ${item.breakIn || '-'}
+Status: ${item.status}`).join("\n\n");
+
+        // Send email via EmailJS
+        emailjs.send("service_itxtkoc", "template_mlh2ahf", {
+            to_email: "richieraphaels60@gmail.com",
+            date: todayStr,
+            summary: summaryText
+        })
+        .then(function(response) {
+            alert('Attendance summary sent to richieraphaels60@gmail.com!');
+        }, function(error) {
+            alert('Failed to send email: ' + JSON.stringify(error));
+        });
+        // ---- END EMAILJS CODE ----
+    });
+
+    // Helper function to compare times (returns minutes difference)
+    function compareTime(t1, t2) {
+        if (!t1 || !t2) return 0;
+        const [h1, m1] = t1.split(':').map(Number);
+        const [h2, m2] = t2.split(':').map(Number);
+        return (h1 * 60 + m1) - (h2 * 60 + m2);
+    }
+
+    // Save summary function
+    function saveAttendanceSummary(dateStr, summaryData) {
+        let allSummaries = JSON.parse(localStorage.getItem('attendanceSummaries') || '{}');
+        allSummaries[dateStr] = summaryData;
+        localStorage.setItem('attendanceSummaries', JSON.stringify(allSummaries));
+    }
+
+    // Load summary function
+    document.getElementById('load-summary').addEventListener('click', function() {
+        const dateStr = document.getElementById('summary-date').value;
+        let allSummaries = JSON.parse(localStorage.getItem('attendanceSummaries') || '{}');
+        const summaryData = allSummaries[dateStr];
+
+        const outputDiv = document.getElementById('summary-output');
+        outputDiv.innerHTML = '';
+        if (!summaryData) {
+            outputDiv.textContent = 'No attendance summary for this date.';
+            return;
+        }
+
+        // Render summary table
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Break Out</th>
+                    <th>Break In</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        summaryData.forEach(item => {
+            html += `<tr>
+                <td>${item.name}</td>
+                <td>${item.timeIn || '-'}</td>
+                <td>${item.timeOut || '-'}</td>
+                <td>${item.breakOut || '-'}</td>
+                <td>${item.breakIn || '-'}</td>
+                <td>${item.status}</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        outputDiv.innerHTML = html;
+    });
+  </script>
+</body>
+</html>
