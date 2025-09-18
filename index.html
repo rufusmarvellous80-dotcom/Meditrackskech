@@ -425,7 +425,7 @@ Status: ${item.status}`).join("\n\n");
             summary: summaryText
         })
         .then(function(response) {
-            alert('Attendance summary sent to dejalizzy25@gmail.com!');
+            alert('Attendance summary sent to dejalizzy25@gmail.com');
         }, function(error) {
             alert('Failed to send email: ' + JSON.stringify(error));
         });
