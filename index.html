@@ -420,12 +420,12 @@ Status: ${item.status}`).join("\n\n");
 
         // Send email via EmailJS
         emailjs.send("service_itxtkoc", "template_mlh2ahf", {
-            to_email: "richieraphaels60@gmail.com",
+            to_email: "dejalizzy25@gmail.com",
             date: todayStr,
             summary: summaryText
         })
         .then(function(response) {
-            alert('Attendance summary sent to richieraphaels60@gmail.com!');
+            alert('Attendance summary sent to dejalizzy25@gmail.com!');
         }, function(error) {
             alert('Failed to send email: ' + JSON.stringify(error));
         });
